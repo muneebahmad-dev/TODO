@@ -93,7 +93,7 @@ class App extends Component {
               </Box>
               {"  "}{" "}
               <Button
-                onClick={()=>this.deleteTodo(data.todo_id)}
+                onClick={this.deleteTodo(data.todo_id)}
                 variant="contained"
                 color="secondary"
                 mt={10}
