@@ -8,8 +8,8 @@ createConnection()
     const app = express();
     app.use(express.json());
 
-    app.use("/", routes);
+    app.use("/api/", routes);
     console.log("App is runing");
-    app.listen("3000");
+    app.listen("5000");
   })
   .catch((error) => console.log(error));

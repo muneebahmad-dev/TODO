@@ -19,11 +19,11 @@ class App extends Component {
     };
   }
   add = async (e) => {
-    const description = this.state.data;
+    const Description = this.state.data;
     e.preventDefault();
     try {
-      const body = { description };
-      const response = await fetch("http://localhost:5000/todos", {
+      const body = { Description };
+      const response = await fetch("http://localhost:5000/api/todos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,10 +44,10 @@ class App extends Component {
   change = (e) => {
     this.setState({ data: e.target.value });
   };
-  deleteTodo = async id => {
+  deleteTodo = async (id) => {
     try {
-      const del = await fetch(`http://localhost:5000/todos${id}`, {
-        method: "DELETE"
+      const del = await fetch(`http://localhost:5000/api/todos/${id}`, {
+        method: "DELETE",
       });
       console.log(del);
     } catch (err) {
@@ -55,9 +55,14 @@ class App extends Component {
     }
   };
   componentDidMount = async () => {
-    const ap = await fetch("http://localhost:5000/todos");
-    const res = await ap.json();
-    this.setState({ list: res });
+    try {
+      const ap = await fetch("http://localhost:5000/api/todos");
+      const res = await ap.json();
+      console.log(".....", res);
+      this.setState({ list: res });
+    } catch (err) {
+      console.log(err);
+    }
   };
   render() {
     return (
@@ -83,8 +88,8 @@ class App extends Component {
         </Button>
         <List>
           {this.state.list.map((data) => (
-            <ListItem value={data.todo_id}>
-              <ListItemText primary={data.description} />
+            <ListItem value={data.id}>
+              <ListItemText primary={data.Description} />
               <Box m={3}>
                 {" "}
                 <Button variant="contained" color="primary" mt={10}>
@@ -93,7 +98,7 @@ class App extends Component {
               </Box>
               {"  "}{" "}
               <Button
-                onClick={this.deleteTodo(data.todo_id)}
+                onClick={this.deleteTodo(data.id)}
                 variant="contained"
                 color="secondary"
                 mt={10}
