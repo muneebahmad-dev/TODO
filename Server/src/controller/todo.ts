@@ -30,8 +30,6 @@ const deleteTodo = async (req, res) => {
   const { id } = req.params;
   try {
     const todo = await getRepository(Todo).delete({ id });
-
-    res.header("Access-Control-Allow-Origin", "*");
     res.send(todo);
     console.log(todo);
   } catch (err) {
@@ -40,4 +38,17 @@ const deleteTodo = async (req, res) => {
   }
 };
 
-module.exports = { getAll, newTodo, deleteTodo };
+const editTodo = async (req, res) => {
+  const { id } = req.params;
+  const { Description } = req.body;
+  try {
+    let todo = await getRepository(Todo).findOne({ where: { id } });
+    todo.Description = Description;
+    const response = await getRepository(Todo).save(todo);
+    res.send(response);
+  } catch (err) {
+    res.send(err);
+  }
+};
+
+module.exports = { getAll, newTodo, deleteTodo, editTodo };
