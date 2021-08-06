@@ -9,77 +9,60 @@ import {
   ListItemText,
   Box,
 } from "@material-ui/core";
+import { Modal } from "antd";
+import "antd/dist/antd.css";
 import "./todo_app.css";
+import { useSelector, useDispatch } from "react-redux";
+import { add_todo, get_todo, delete_todo, edit_todo } from "./redux/TodoSlice";
+import { todoSelector } from "./redux/selectors";
 const Todo = () => {
   const [data, setData] = useState("");
-  const [list, setList] = useState([]);
-  const textInput = React.useRef();
+  const [updateData, setUpdateData] = useState({
+    id: "",
+    Description: "",
+  });
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    editTodo();
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const dispatch = useDispatch();
+  const todoState = useSelector(todoSelector);
 
   useEffect(async () => {
     getAll();
-  }, []);
-
-  const clearInput = () => (textInput.current.value = "");
+    console.log(updateData);
+  }, [updateData]);
 
   const getAll = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/todos", {
-        method: "GET",
-      });
-      const res = await response.json();
-      setList(res);
-    } catch (err) {
-      console.log(err);
-    }
+    dispatch(get_todo());
   };
 
   const addTodo = async () => {
     const Description = data;
-    try {
-      const body = { Description };
-      const response = await fetch("http://localhost:5000/api/todos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      const res = await response.json();
-      console.log("added", res);
-      getAll();
-      setData(" ");
-    } catch (err) {
-      console.log(err);
-    }
+    const body = { Description };
+    dispatch(add_todo(body));
+    setData("");
   };
 
   const deleteTodo = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/todos/${id}`, {
-        method: "DELETE",
-      });
-      getAll();
-    } catch (err) {
-      console.log(err);
-    }
+    dispatch(delete_todo(id));
+    getAll();
   };
 
-  const editTodo = async (id) => {
-    const Description = data;
-    try {
-      const body = { Description };
-      const response = await fetch(`http://localhost:5000/api/todos/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      const res = response.json();
-      console.log(res);
-    } catch (err) {
-      console.log(err);
-    }
+  const editTodo = async () => {
+    dispatch(edit_todo(updateData));
+    getAll();
   };
 
   const handleChange = (e) => {
@@ -100,32 +83,55 @@ const Todo = () => {
         ADD
       </Button>
       <List>
-        {list.map((data) => (
-          <ListItem key={data.id}>
-            <ListItemText primary={data.Description} />
-            <Box m={3}>
-              {" "}
+        {todoState &&
+          todoState?.map((data) => (
+            <ListItem key={data.id}>
+              <ListItemText primary={data.Description} />
+              <Box m={3}>
+                {" "}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  mt={10}
+                  onClick={() => {
+                    showModal();
+                    setUpdateData({
+                      id: data.id,
+                      Description: data.Description,
+                    });
+                  }}
+                >
+                  EDIT
+                </Button>
+              </Box>
               <Button
+                onClick={() => deleteTodo(data.id)}
                 variant="contained"
-                color="primary"
+                color="secondary"
                 mt={10}
-                onClick={() => editTodo()}
               >
-                EDIT
+                DELETE
               </Button>
-            </Box>
-            {"  "}{" "}
-            <Button
-              onClick={() => deleteTodo(data.id)}
-              variant="contained"
-              color="secondary"
-              mt={10}
-            >
-              DELETE
-            </Button>
-          </ListItem>
-        ))}
+            </ListItem>
+          ))}
       </List>
+      <Modal
+        title="Edit Todo"
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <input
+          type="text"
+          value={updateData.Description}
+          onChange={(e) => {
+            setUpdateData((prevState) => ({
+              ...prevState,
+              Description: e.target.value,
+            }));
+          }}
+        />
+      </Modal>
     </div>
   );
 };
