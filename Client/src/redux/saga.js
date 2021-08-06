@@ -23,7 +23,6 @@ function* addTodo({ payload }) {
 }
 
 function* editTodo({ payload }) {
-  console.log("saga", payload);
   try {
     const user = yield axios.put(
       `http://localhost:5000/api/todos/${payload.id}`,
